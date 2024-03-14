@@ -1,0 +1,115 @@
+﻿
+
+@{
+    ViewData["Title"] = "SignUp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model PetShop.Models.Customer
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký</title>
+</head>
+<body>
+    <div class="banner">
+        <div class="jumbotron jumbotron-bg text-center rounded-0" style="background-image: url('/assets/img/bn_login.jpg');">
+            <div class="main-content mt-5">
+                <form class="col-md-offset-2 col-md-10" asp-validation-summary="All" method="post">
+
+                    <div class="form-title-row">
+                        <h1>Đăng ký</h1>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Tên</span>
+                            <input asp-for="Name" />
+                        </label>
+                        <span class="text-danger">@ViewData["msgNameSame"]</span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Email</span>
+                            <input type="email" asp-for="Email" />
+                        </label>
+                        <span class="text-danger">@ViewData["msgEmailSame"]</span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Tài khoản</span>
+                            <input asp-for="TaiKhoan" />
+                        </label>
+                        <span class="text-danger">@ViewData["msgTaikhoanSame"]</span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Mật khẩu</span>
+                            <input type="password" asp-for="MatKhau" />
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Tỉnh</span>
+                            <input asp-for="Province" />
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Huyện</span>
+                            <input asp-for="District" />
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Phường</span>
+                            <input asp-for="Wards" />
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Địa chỉ cụ thể</span>
+                            <textarea asp-for="Address"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Điện thoại</span>
+                            <input id="phoneNumber" type="text" asp-for="Phone" oninput="checkPhoneNumberFormat()" />
+                            <br />
+                            <span id="phoneErrorSpan" style="color: red; text-align:center"></span>
+                            <div class="msg-error" style="text-align:center;color:red; margin-top: 5px">
+                                @ViewData["msgPhone"]
+                                @ViewData["msgPhoneSame"]
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="Đăng Ký" class="btn btn-default" />
+                        </div>
+                    </div>
+
+                
+
+                    <div style="text-align:center;color:green">
+                        @ViewData["msgSuccess"]
+                        @ViewData["message"]
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

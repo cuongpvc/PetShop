@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Verify OTP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Xác thực OTP</div>
+
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-group row">
+                            <label for="otp" class="col-md-4 col-form-label text-md-right">Mã OTP</label>
+
+                            <div class="col-md-6">
+                                <input id="otp" type="text" class="form-control" name="otp" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <button type="submit" class="btn btn-primary">Xác thực</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Render section 'Scripts' -->
+    @section Scripts {
+        <script>
+            $(document).ready(function () {
+                $('#verifyButton').click(function () {
+                    var otp = $('#otpInput').val();
+                    if (!otp || !/^\d+$/.test(otp)) {
+                        $('#otpError').text('OTP không hợp lệ !');
+                        return;
+                    }
+
+                    // Submit form if validation passes
+                    $('#otpForm').submit();
+                });
+            });
+        </script>
+    }
+

@@ -1,0 +1,118 @@
+﻿@model List<PetShop.Controllers.ProductController.CategoryProductModel>
+
+@{
+    ViewData["Title"] = "ListProduct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="topbar">
+    <!-- Mã HTML cho topbar -->
+</div>
+
+<div class="banner">
+    <div class="jumbotron jumbotron-bg text-center rounded-0" style="background-image: url('https://azpet.com.vn/wp-content/uploads/2021/07/Banner-Mobile-Cho-Canh.jpg')">
+    </div>
+</div>
+
+<div class="main-content">
+    <section id="vegetables" class="gray-bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 mb-5">
+                    <!-- Category Links -->
+                    @if (Model.Count() > 1)
+                    {
+                        <div class="shop-categories owl-carousel mt-5">
+                            <div class="item">
+                                <a class="category-link" href="?isAllProducts=true">
+                                    <!-- All Products Link -->
+                                    <div class="media d-flex align-items-center justify-content-center">
+                                        <span class="d-flex mr-2"><i class="sb-bistro-french-fries"></i></span>
+                                        <div class="media-body">
+                                            <h5>Tất cả sản phẩm</h5>
+                                            <p>Tất cả sản phẩm</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            @foreach (var category in Model)
+                            {
+                                <div class="item">
+                                    <a href="?categoryId=@category.Category.CategoryId">
+                                        <!-- Product Category Link -->
+                                        <div class="media d-flex align-items-center justify-content-center">
+                                            <span class="d-flex mr-2"><img src="@category.Category.Picture" width="50" height="50" /></span>
+                                            <div class="media-body">
+                                                <h5>@category.Category.CategoryName</h5>
+                                                <p class="category-description">@category.Category.Description</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="col-md-12">
+                    <div class="content">
+                        @foreach (var category in Model)
+                        {
+                            <div id="category-content-@category.Category.CategoryId" class="category-content">
+                                <h2 class="category-title">@category.Category.CategoryName</h2>
+                                <div class="product-carousel owl-carousel">
+                                    @foreach (var product in category.Products)
+                                    {
+                                        <div class="card card-product">
+                                            <div class="card-body">
+                                                <img class="product-image" src="@product.Pictures.FirstOrDefault()?.Picture" alt="Product Image">
+                                                <h4 class="card-title product-name">
+                                                    <a href="/Product/ProductDetail?id=@product.ProductId">@product.ProductName</a>
+                                                </h4>
+                                                @if (product.Status == false || product.QuantityPerUnit <= 0)
+                                                {
+                                                    <p class="card-text product-price">@product.UnitPrice VNĐ</p>
+                                                    <a href="#"><input type="button" value="Hết hàng" style="background-color: rgba(0, 0, 0, 0.5); color:red;border: 1px solid gray;"></a>
+                                                }
+                                                else
+                                                {
+                                                    <p class="card-text product-price">@product.UnitPrice VNĐ</p>
+                                                    <!-- Add to Cart Button -->
+                                                    <a asp-page="/Product/ProductDetail" asp-page-handler="addtocart" asp-route-id="@product.ProductId"><input type="button" value="ADD TO CART" style="background-color: #fff; color:red;border: 1px solid gray;"></a>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Xử lý sự kiện khi click vào danh mục sản phẩm
+        $('.category-link').on('click', function (event) {
+            event.preventDefault();
+            var categoryId = $(this).attr('href').split('=')[1];
+
+            // Tải lại danh sách sản phẩm theo danh mục được chọn
+            $.ajax({
+                url: "/NewFolder/List?handler=CategoryProducts&categoryId=" + categoryId,
+                method: "GET",
+                success: function (data) {
+                    $('.content').html(data);
+                }
+            });
+
+            // Đánh dấu danh mục được chọn trong sidebar
+            $('.category-link').removeClass('active');
+            $(this).addClass('active');
+        });
+    });
+</script>
