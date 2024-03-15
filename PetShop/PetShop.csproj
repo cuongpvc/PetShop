@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+	 
   <ItemGroup>
     <None Include="wwwroot\fonts\.DS_Store" />
     <None Include="wwwroot\fonts\flaticon\.DS_Store" />
