@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PetShop.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PetShop.Controllers
@@ -56,6 +57,38 @@ namespace PetShop.Controllers
         {
             public Category Category { get; set; }
             public List<Product> Products { get; set; }
+        }
+
+
+        public IActionResult AddToCart(int id, decimal unitPrice)
+        {
+            List<OrderDetail> orderList = new List<OrderDetail>();
+            if (HttpContext.Session.GetString("order") != null)
+            {
+                string data = HttpContext.Session.GetString("order");
+                orderList = JsonSerializer.Deserialize<List<OrderDetail>>(data);
+            }
+            else
+            {
+                orderList = new List<OrderDetail>();
+            }
+
+            OrderDetail order = orderList.FirstOrDefault(s => s.ProductId == id);
+            if (order != null)
+            {
+                order.Quantity++;
+            }
+            else
+            {
+                order = new OrderDetail();
+                order.ProductId = id;
+                order.Quantity = 1;
+                order.UnitPrice = unitPrice;
+                orderList.Add(order);
+            }
+
+            HttpContext.Session.SetString("order", JsonSerializer.Serialize(orderList));
+            return RedirectToAction("ListProduct");
         }
     }
 }

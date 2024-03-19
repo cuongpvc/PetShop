@@ -1,0 +1,75 @@
+﻿@model List<OrderDetail>
+
+@{
+    ViewData["Title"] = "View Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="h-100" style="background-color: #eee;">
+    <div class="container h-100 py-5">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-10">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-normal mb-0 text-black">Shopping Cart</h3>
+                    <div>
+                        <p class="mb-0">
+                            <span class="text-muted">Sort by:</span> <a href="#!" class="text-body">
+                                price <i class="fas fa-angle-down mt-1"></i>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                @foreach (var orderDetail in Model)
+                {
+                    <div class="card rounded-3 mb-4">
+                        <div class="card-body p-4">
+                            <div class="row d-flex justify-content-between align-items-center">
+                                <div class="col-md-2 col-lg-2 col-xl-2">
+                                    <img class="img-fluid rounded-3" src="@orderDetail.Product.Pictures.FirstOrDefault()?.Picture" alt="Product Image">
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-3">
+                                    <p class="lead fw-normal mb-2">@orderDetail.Product.ProductName</p>
+                                </div>
+                                <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                                    <input id="quantityInput_@orderDetail.ProductId" min="1" name="quantity" value="@orderDetail.Quantity" type="number" class="form-control form-control-sm quantity-input" data-product-id="@orderDetail.ProductId" />
+                                </div>
+                                <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                    <h5 class="mb-0 subtotal" id="subtotal_@orderDetail.ProductId" data-unit-price="@orderDetail.Product.UnitPrice">$@(orderDetail.Product.UnitPrice * orderDetail.Quantity)</h5>
+                                </div>
+
+                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                    <a asp-action="DeleteToCard" asp-controller="Order"
+                                       asp-route-id="@orderDetail.ProductId" class="text-danger">
+                                        <i class="fas fa-trash fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(document).ready(function () {
+        $('.quantity-input').on('change', function () {
+            var productId = $(this).data('product-id');
+            var quantity = parseInt($(this).val());
+            var unitPrice = parseFloat($('#subtotal_' + productId).data('unit-price'));
+            var subtotal = unitPrice * quantity;
+            $('#subtotal_' + productId).text('$' + subtotal.toFixed(2));
+        });
+    });
+</script>
+
+

@@ -77,7 +77,8 @@
                                                 {
                                                     <p class="card-text product-price">@product.UnitPrice VNĐ</p>
                                                     <!-- Add to Cart Button -->
-                                                    <a asp-page="/Product/ProductDetail" asp-page-handler="addtocart" asp-route-id="@product.ProductId"><input type="button" value="ADD TO CART" style="background-color: #fff; color:red;border: 1px solid gray;"></a>
+                                                    <a asp-action="AddToCart" asp-controller="Product" asp-route-id="@product.ProductId" asp-route-unitPrice="@product.UnitPrice">
+                                                        <input type="button" value="ADD TO CART" style="background-color: #fff; color:red;border: 1px solid gray;"></a>
                                                 }
                                             </div>
                                         </div>
