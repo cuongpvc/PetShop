@@ -1,0 +1,361 @@
+﻿@section Styles {
+
+}
+@model List<Product>
+
+<h1 class="h3 mb-2 text-gray-800">Product Management</h1>
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary d-flex justify-content-between align-items-center">
+            <span>List of Product</span>
+            <span>
+                <button class="btn btn-primary btn-action" data-action="create">Create</button>
+            </span>
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>ProductName </th>
+                        <th width="100px">Category</th>
+                        <th>QuantityPerUnit</th>
+                        <th>UnitPrice</th>
+                        <th>Discontinued</th>
+                        <th data-ellipsis="20">Description</th>
+                        <th>Status</th>
+                        <th>CreateDate</th>
+                        <th>UpdateDate</th>
+                        <th width="150px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>
+                                @{
+                                    var picture = product.Pictures?.FirstOrDefault();
+                                    var pictureUrl = picture != null ? picture.Picture : "";
+                                }
+                                <img src="@pictureUrl" alt="@product.ProductName" width="100" height="100" />
+                            </td>
+                            <td>@product.ProductName</td>
+                            <td>@product?.Category?.CategoryName</td>
+                            <td>@product.QuantityPerUnit</td>
+                            <td>@product.UnitPrice</td>
+                            <td>@product.Discontinued</td>
+                            <td title="@product.Description">@product.Description</td>
+                            <td>@(product.Status ? "Active" : "Inactive")</td>
+                            <td>@product.CreateDate</td>
+                            <td>@product.UpdateDate</td>
+                            <td>
+                                <button class="btn btn-primary btn-action" data-id="@product.ProductId" data-action="edit">Edit</button>
+                                <button class="btn btn-danger btn-action" data-id="@product.ProductId" data-action="delete">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal add/edit product -->
+<div class="modal fade" id="modalProduct" tabindex="-1" role="dialog" aria-labelledby="modalProductLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProductLabel">Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formProduct" method="post">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row">
+                                <input type="hidden" id="ProductId" name="ProductId" data-type="number" />
+                                <div class="form-group col-6">
+                                    <label for="ProductName">Product Name</label>
+                                    <input type="text" class="form-control" id="ProductName" name="ProductName" />
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="QuantityPerUnit">Quantity Per Unit</label>
+                                    <input type="text" class="form-control" id="QuantityPerUnit" name="QuantityPerUnit" data-type="number" />
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="CategoryId">Category</label>
+                                    <select class="form-control" id="CategoryId" name="CategoryId" data-type="number">
+                                    </select>
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="UnitPrice">Unit Price</label>
+                                    <input type="text" class="form-control" id="UnitPrice" name="UnitPrice" data-type="price" />
+                                </div>
+                                <div class="form-group col-12">
+                                    <label for="Description">Description</label>
+                                    <textarea class="form-control" id="Description" name="Description" rows="5"></textarea>
+                                </div>
+                                <div class="form-group col-4 justify-content-center">
+                                    <label for="Discontinued">Discontinued <input type="checkbox" class="form-control h-20" id="Discontinued" name="Discontinued" data-type="boolean" /></label>
+                                </div>
+                                <div class="form-group col-4">
+                                    <label for="Status">Status <input type="checkbox" class="form-control h-20" id="Status" name="Status" data-type="boolean" /></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="Picture">Pictures</label>
+                                <div id="listPicture"></div>
+                                <button class="btn btn-primary btn-block" id="btnAddPicture" type="button">Add Picture</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-action" data-action="save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var categories = [];
+            // Xử lý datatable
+            $("#dataTable").DataTable({
+                columnDefs: [
+                    {
+                        targets: [6],
+                        render: $.fn.dataTable.render.ellipsis(100),
+                    },
+                ],
+                scrollCollapse: true,
+                scrollY: '500px',
+            });
+            // Xử lý modal
+            $(document).on("click", ".btn-action", async function () {
+                var action = $(this).data("action");
+                var id = $(this).data("id");
+
+                if (categories.length === 0) {
+                    var url = `/admin/api/category`;
+                    var response = await fetch(url);
+                    var data = await response.json();
+                    categories = data;
+                    handleBindingCategory(categories);
+                }
+
+                if (action === "edit") {
+                    var url = `/admin/api/product/${id}`;
+                    var response = await fetch(url);
+                    var data = await response.json();
+                    resetForm();
+                    handleBindingData(data);
+                    showModal();
+                } else if (action === "create") {
+                    resetForm();
+                    showModal();
+                } else if (action === "delete") {
+                    Swal.fire({
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!",
+                    }).then(async (result) => {
+                        if (result.value) {
+                            var url = `/admin/api/product/${id}`;
+                            $.ajax({
+                                url: url,
+                                method: "DELETE",
+                                success: function (res) {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "Success",
+                                        text: "Delete product successfully!",
+                                    }).then(function () {
+                                        location.reload();
+                                    });
+                                },
+                                error: function (res) {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: res.responseText || "Something went wrong!",
+                                    });
+                                },
+                            });
+                        }
+                    });
+                } else if (action === "save") {
+                    $("#formProduct").submit();
+                }
+            });
+
+            $("#formProduct").validate({
+                rules: {
+                    ProductName: {
+                        required: true,
+                    },
+                    QuantityPerUnit: {
+                        required: true,
+                    },
+                    CategoryId: {
+                        required: true,
+                    },
+                    UnitPrice: {
+                        required: true,
+                        number: true,
+                    },
+                    Description: {
+                        required: true,
+                    },
+                },
+                messages: {
+                    ProductName: {
+                        required: "Please enter product name",
+                    },
+                    QuantityPerUnit: {
+                        required: "Please enter quantity per unit",
+                    },
+                    CategoryId: {
+                        required: "Please select category",
+                    },
+                    UnitPrice: {
+                        required: "Please enter unit price",
+                        number: "Please enter a valid number",
+                    },
+                    Description: {
+                        required: "Please enter description",
+                    },
+                },
+                submitHandler: function (form) {
+                    var url = "/admin/api/product";
+                    var method = "POST";
+                    var productId = $("#ProductId").val();
+                    if (productId && productId > 0) {
+                        url = `/admin/api/product/${productId}`;
+                        method = "PUT";
+                    }
+                    $("#ProductId").val(productId || 0);
+                    var data = $(form).serializeArray();
+                    var pictures = $("#listPicture input").map(function () {
+                        return {
+                            PictureId: $(this).data("picture-id") || 0,
+                            Picture: $(this).val(),
+                        };
+                    }).get();
+                    data.push({ name: "Pictures", value: pictures });
+
+                    data = data.map(function (item) {
+                        var dataType = $(`#${item.name}`).data("type");
+                        if (dataType === "number") {
+                            item.value = parseInt(item.value);
+                        } else if (dataType === "price") {
+                            item.value = parseFloat(item.value);
+                        } else if (dataType === "boolean") {
+                            item.value = $(`#${item.name}`).is(":checked");
+                        }
+                        return item;
+                    });
+
+                    // convert to object
+                    data = data.reduce(function (acc, item) {
+                        acc[item.name] = item.value;
+                        return acc;
+                    }, {});
+
+                    $.ajax({
+                        url: url,
+                        method: method,
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success",
+                                text: "Save product successfully!",
+                            }).then(function () {
+                                location.reload();
+                            });
+                        },
+                        error: function (res) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: res.responseText || "Something went wrong!",
+                            });
+                        },
+                    });
+                },
+            });
+
+            function resetForm() {
+                $("#formProduct")[0].reset();
+                $("#formProduct").validate().resetForm();
+                $("#listPicture").html("");
+            }
+
+            function showModal() {
+                $("#modalProduct").modal("show");
+            }
+
+            function handleBindingData(data) {
+                Object.keys(data).forEach(function (key) {
+                    let isCheckbox = $(`#${key}`).is(":checkbox");
+                    if (isCheckbox) {
+                        $(`#${key}`).prop("checked", data[key]);
+                    } else {
+                        $(`#${key}`).val(data[key]);
+                    }
+                });
+                handleBindingPicture(data.Pictures);
+            }
+
+            function handleBindingCategory(data) {
+                var options = data.map(function (item) {
+                    return `<option value="${item.CategoryId}">${item.CategoryName}</option>`;
+                });
+                $("#CategoryId").html(options.join(""));
+            }
+
+            function handleBindingPicture(data) {
+                var pictures = data.map(function (item) {
+                    if (item.Picture) item.Picture = item.Picture.trim();
+                    return `<div class="input-group mb-3">
+                                <input type="text" class="form-control" value="${item.Picture}" data-picture-id="${item.PictureId}" />
+                                <div class="input-group-append">
+                                    <button class="btn btn-danger btn-remove" type="button">Remove</button>
+                                </div>
+                            </div>`;
+                });
+                $("#listPicture").html(pictures.join(""));
+            }
+
+            $("#btnAddPicture").click(function () {
+                var picture = `<div class="input-group mb-3">
+                                <input type="text" class="form-control" />
+                                <div class="input-group-append">
+                                    <button class="btn btn-danger btn-remove" type="button">Remove</button>
+                                </div>
+                            </div>`;
+                $("#listPicture").append(picture);
+            });
+
+            $("#listPicture").on("click", ".btn-remove", function () {
+                $(this).closest(".input-group").remove();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,64 @@
+﻿@model List<Account>
+
+<h1 class="h3 mb-2 text-gray-800">Accounts Management</h1>
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary d-flex justify-content-between align-items-center">
+            <span>List of Account</span>
+            <span>
+                <button class="btn btn-primary btn-action" data-action="create">Create</button>
+            </span>
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>CustomerId</th>
+                        <th>EmployeeId</th>
+                        <th>Role</th>
+                        <th>IsActive</th>
+                        <th>ShipperId</th>
+                        <th width="150px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var account in Model)
+                    {
+                        <tr>
+                            <td>@account.Email</td>
+                            <td>@account.TaiKhoan</td>
+                            <td>@(account.CustomerId == null ? account.Customer.Name : string.Join(account.Employee.FirstName, " ", account.Employee.LastName))</td>
+                            <td>@account.Role</td>
+                            <td>@account.IsActive</td>
+                            <td>@account.ShipperId</td>
+                            <td>
+                                <button class="btn btn-primary btn-action" data-id="@account.AccountId" data-action="edit">Edit</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Xử lý datatable
+            $("#dataTable").DataTable({
+                columnDefs: [
+                    {
+                        targets: [2],
+                        render: $.fn.dataTable.render.ellipsis(100),
+                    },
+                ],
+                scrollCollapse: true,
+                scrollY: '500px',
+            });
+        });
+    </script>
+}
