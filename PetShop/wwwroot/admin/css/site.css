@@ -1,0 +1,17 @@
+.truncate-to-3-lines {
+  width: 300px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.h-20 {
+  height: 20px;
+  width: 20px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+}
