@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PetShop.Models;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Net.Mail;
-using System.Net;
-using System.Text.RegularExpressions;
-using System;
 
 namespace PetShop.Controllers
 {
@@ -43,7 +44,9 @@ namespace PetShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                var acc = await _db.Accounts.FirstOrDefaultAsync(a => a.TaiKhoan == account.TaiKhoan && a.Password == account.Password);
+                var acc = await _db.Accounts.FirstOrDefaultAsync(
+                    a => a.TaiKhoan == account.TaiKhoan && a.Password == account.Password
+                );
 
                 if (acc != null)
                 {
@@ -55,14 +58,24 @@ namespace PetShop.Controllers
                             new Claim(ClaimTypes.Role, acc.Role.ToString())
                         };
 
-                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var claimsIdentity = new ClaimsIdentity(
+                            claims,
+                            CookieAuthenticationDefaults.AuthenticationScheme
+                        );
                         var authProperties = new AuthenticationProperties
                         {
                             IsPersistent = false,
                             AllowRefresh = true,
                         };
 
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                        await HttpContext.SignInAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
+                            authProperties
+                        );
+                        string accJson = JsonConvert.SerializeObject(acc);
+                        HttpContext.Session.SetString("LoggedInAccount", accJson);
+                        HttpContext.Session.SetString("PetSession", accJson);
 
                         if (acc.Role == 2)
                         {
@@ -151,7 +164,10 @@ namespace PetShop.Controllers
                 // Configure SMTP client
                 SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587); // Update with your SMTP server details
                 smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential("your-email@gmail.com", "your-password"); // Update with your email credentials
+                smtpClient.Credentials = new NetworkCredential(
+                    "your-email@gmail.com",
+                    "your-password"
+                ); // Update with your email credentials
                 smtpClient.EnableSsl = true;
 
                 // Compose email message
@@ -193,10 +209,13 @@ namespace PetShop.Controllers
                 }
 
                 // Kiểm tra email không trùng
-                var existingEmail = await _db.Customers.FirstOrDefaultAsync(c => c.Email == customer.Email);
+                var existingEmail = await _db.Customers.FirstOrDefaultAsync(
+                    c => c.Email == customer.Email
+                );
                 if (existingEmail != null)
                 {
-                    ViewData["msgEmailSame"] = "Email đã được sử dụng. Vui lòng sử dụng email khác.";
+                    ViewData["msgEmailSame"] =
+                        "Email đã được sử dụng. Vui lòng sử dụng email khác.";
                     return View(customer);
                 }
 
@@ -208,7 +227,9 @@ namespace PetShop.Controllers
                 }
 
                 // Kiểm tra Name không trùng
-                var existingName = await _db.Customers.FirstOrDefaultAsync(c => c.Name == customer.Name);
+                var existingName = await _db.Customers.FirstOrDefaultAsync(
+                    c => c.Name == customer.Name
+                );
                 if (existingName != null)
                 {
                     ViewData["msgNameSame"] = "Tên người dùng đã tồn tại. Vui lòng chọn tên khác.";
@@ -223,10 +244,13 @@ namespace PetShop.Controllers
                 }
 
                 // Kiểm tra tên tài khoản không trùng
-                var existingTaikhoan = await _db.Customers.FirstOrDefaultAsync(c => c.TaiKhoan == customer.TaiKhoan);
+                var existingTaikhoan = await _db.Customers.FirstOrDefaultAsync(
+                    c => c.TaiKhoan == customer.TaiKhoan
+                );
                 if (existingTaikhoan != null)
                 {
-                    ViewData["msgTaikhoanSame"] = "Tên tài khoản đã tồn tại. Vui lòng chọn tên khác.";
+                    ViewData["msgTaikhoanSame"] =
+                        "Tên tài khoản đã tồn tại. Vui lòng chọn tên khác.";
                     return View(customer);
                 }
 
@@ -238,17 +262,21 @@ namespace PetShop.Controllers
                 }
 
                 // Kiểm tra số điện thoại không trùng
-                var existingPhone = await _db.Customers.FirstOrDefaultAsync(c => c.Phone == customer.Phone);
+                var existingPhone = await _db.Customers.FirstOrDefaultAsync(
+                    c => c.Phone == customer.Phone
+                );
                 if (existingPhone != null)
                 {
-                    ViewData["msgPhoneSame"] = "Số điện thoại đã được sử dụng. Vui lòng sử dụng số khác.";
+                    ViewData["msgPhoneSame"] =
+                        "Số điện thoại đã được sử dụng. Vui lòng sử dụng số khác.";
                     return View(customer);
                 }
 
                 // Kiểm tra số điện thoại có đúng định dạng không
                 if (!Regex.IsMatch(customer.Phone, @"^0\d{9}$"))
                 {
-                    ViewData["msgPhone"] = "Số điện thoại không hợp lệ. Vui lòng nhập số bắt đầu từ 0 và có 10 chữ số!";
+                    ViewData["msgPhone"] =
+                        "Số điện thoại không hợp lệ. Vui lòng nhập số bắt đầu từ 0 và có 10 chữ số!";
                     return View(customer);
                 }
 
@@ -278,6 +306,13 @@ namespace PetShop.Controllers
             }
 
             return View(customer);
+        }
+
+        [HttpPost]
+        public IActionResult RemoveSession()
+        {
+            HttpContext.Session.Remove("messFail");
+            return Ok();
         }
     }
 }

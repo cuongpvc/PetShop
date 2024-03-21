@@ -6,12 +6,48 @@
 @model PetShop.Models.Account
 
 <link href="~/css/signin.css" rel="stylesheet" />
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Form</title>
 </head>
+
+<script>
+        $(document).ready(function () {
+            // Kiểm tra xem session messFail có tồn tại không
+            var message = "@ViewContext.HttpContext.Session.GetString("messFail")";
+            console.log("Message from session:", message);
+            if (message) {
+                toastr.options = {
+                    "positionClass": "toast-top-right",
+                    "closeButton": true,
+                    "progressBar": true,
+                    "timeOut": 5000,
+                    "extendedTimeOut": 2000,
+                    "tapToDismiss": false,
+                    "preventDuplicates": true,
+                    "progressBarColor": "#FF3366",
+                    "toastClass": "custom-toast"
+                };
+
+                toastr.error(message);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/RemoveSession",
+                    success: function (result) {
+                        console.log("Session removed successfully.");
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log("Error removing session.");
+                    }
+                });
+            }
+        });
+    </script>
+
 
 <body>
     <div class="banner">
@@ -77,4 +113,5 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&sensor=false"></script>
     <script src="js/google-map.js"></script>
     <script src="js/main.js"></script>
+    
 </body>

@@ -13,6 +13,8 @@ builder.Services.AddDbContext<ProjectContext>(options =>
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Adjust the timeout as needed
